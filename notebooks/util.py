@@ -1,5 +1,7 @@
 import glob
 from copy import deepcopy
+import os
+import pandas as pd
 
 def read_isochrone_files(dirpath="isochrones"):
     isochrones = glob.glob(os.path.join(dirpath, "SDSSugriz/*.SDSSugriz"))
@@ -74,4 +76,4 @@ def read_isochrone_files(dirpath="isochrones"):
             iso['a_Fe'].append(a_Fe)
 
         cleaned_isochrones += isochrones_in_this_file
-    return cleaned_isochrones
+    return cleaned_isochrones[1:]
