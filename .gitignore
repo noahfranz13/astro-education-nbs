@@ -164,3 +164,9 @@ cython_debug/
 # Ignore large MIST files
 MIST_v1.2_vvcrit0.0_basic_isos*
 ..bfg-report
+
+# Ignore pkl files
+*.pkl
+
+# Ignore the MACOS directory
+*__MACOS*
