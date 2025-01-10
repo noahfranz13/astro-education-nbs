@@ -1,3 +1,4 @@
+from functools import partial
 from typing import List
 import zipfile
 import glob
@@ -176,9 +177,100 @@ def plot_labels_stars(labels):
     plt.show()
     plt.close()
 
-def label_turnoff(x,y):
-    plt.text(x+1.1, y+0.6, 'turnoff')
-    plt.plot([x,x+1], [y,y+0.5], 'k-')
+def show_cluster_data(ax=None, *args, **kwargs):
+    """
+    Display the cluster data. All arguments are passed to the cluster_filter
+    """
+
+    res = cluster_filter(*args, **kwargs)
+
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    ax.set_xlabel('Color (SDSS g-r)')
+    ax.set_ylabel('Magnitude (SDSS g)')
+    
+    # need to correct the Gaia magnitude and convert to SDSS to compare with isochrone
+    # See Table 4.7 https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/chap_cu5pho/sec_cu5pho_calibr/ssec_cu5pho_PhotTransf.html
+    g_bp_minus_g_rp = res.phot_bp_mean_mag - res.phot_rp_mean_mag
+    correction = lambda x, c1, c2, c3, c4 : c1 + c2*x + c3*x**2 + c4*x**3
+    r = res.phot_g_mean_mag - correction(g_bp_minus_g_rp, -0.12879, 0.24662, -0.027464, -0.049465)
+    g = res.phot_g_mean_mag - correction(g_bp_minus_g_rp, 0.13518, -0.46245, -0.25171, 0.021349)
+    
+    ax.plot(
+        g-r,
+        g, 
+        marker='.',
+        linestyle='none',
+        color='k'
+    )
+
+    ax.set_ylim(9, 16)
+    ax.set_xlim(-0.2, 1.6)
+    
+    ax.invert_yaxis()
+    
+    return ax
+
+def write_label(x, y, label, ax, color='red', **kwargs):
+
+    if x == "CHANGE ME" or y == "CHANGE ME":
+        return #they still need to replace them
+
+    if isinstance(x, str):
+        x = float(x)
+
+    if isinstance(y, str):
+        y = float(y)
+
+    ax.text(x, y, label, color=color, fontsize=18)
+    # ax.plot([x,x+0.2], [y,y+0.3], linestyle='-', color=color)
+
+def distance_mod(M, d):
+    return M + 5*np.log10(d/10)
+    
+def show_isochrone(age=14.5, distance=10, Fe_H=0.06, Y=0.2682, ax=None, **kwargs):
+    """
+    Fe_H = 0.06 is from this paper https://arxiv.org/abs/1310.6297 
+    """
+
+    if age < 0.76 or age > 14.74:
+        raise Exception("the age you input must be between 0.76 and 14.74 Gyr!")
+    
+    isochrones = read_isochrone_files(os.path.join(os.getcwd(), "isochrones.pkl.zip"))
+    isochrones = pd.concat(isochrones)
+    isochrones.Y = isochrones.Y.astype(float)
+    isochrones.Fe_H = isochrones.Fe_H.astype(float)
+
+    # filter based on the input
+    # we will also take some default metallicity and helium abundance (~ solar Y)
+    # just for simplicity
+    isochrones = isochrones[
+        np.isclose(isochrones.age, age, atol=0.24) *
+        (isochrones.Fe_H == Fe_H) *
+        (isochrones.Y == Y)
+    ]
+
+    if len(isochrones) == 0:
+        raise Exception("No isochrone matching your input parameters! Please try again or ask an instructor!")
+
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    ax.set_xlabel('Color (SDSS g-r)')
+    ax.set_ylabel('Magnitude (SDSS g)')
+    
+    g = distance_mod(isochrones.g.astype(float), distance)
+    r = distance_mod(isochrones.r.astype(float), distance)
+    
+    ax.plot(g-r, g, linewidth=3, **kwargs)
+    ax.invert_yaxis()
+    
+    return ax
+
+show_correct_isochrone = partial(show_isochrone, distance=800, age=6, color='red', label='D=800 pc\nAge=6 Gyr')
+show_close_isochrone = partial(show_isochrone, distance=400, age=6, color='blue', label='D=400 pc\nAge=6 Gyr')
+show_old_isochrone = partial(show_isochrone, distance=800, age=14, color='green', label='D=800 pc\nAge=14 Gyr')
 
 def cluster_filter(
         cone_search_radius:float=2,
@@ -190,7 +282,7 @@ def cluster_filter(
         proper_motion_ra:float=-11,
         proper_motion_dec:float=-2.9,
         overwrite=False,
-        gaia_result_path="../data/gaia_cone_search_results.csv"
+        gaia_result_path="gaia_cone_search_results.csv"
     ) -> pd.DataFrame:
 
     cluster_coord = SkyCoord(132.85, 11.81, unit=u.deg)
