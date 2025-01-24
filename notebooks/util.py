@@ -129,10 +129,8 @@ def plot_labels_cmd(labels):
             plt.text(0.2, 0.2, v, transform=fig.transFigure)
         elif k == 'lower-right':
             plt.text(0.7, 0.2, v, transform=fig.transFigure)
-
-
-    plt.show()
-    plt.close()
+    
+    return fig
 
 def plot_labels_physical(labels):
     fig  = plt.figure()
@@ -152,8 +150,7 @@ def plot_labels_physical(labels):
             plt.text(0.65, 0.2, v, transform=fig.transFigure)
 
 
-    plt.show()
-    plt.close()
+    return fig
 
 
 def plot_labels_stars(labels):
@@ -172,10 +169,8 @@ def plot_labels_stars(labels):
             plt.text(0.2, 0.2, v, transform=fig.transFigure)
         elif k == 'lower-right':
             plt.text(0.65, 0.2, v, transform=fig.transFigure)
-
-
-    plt.show()
-    plt.close()
+    
+    return fig
 
 def show_cluster_data(ax=None, *args, **kwargs):
     """
