@@ -1,4 +1,4 @@
-from functools import partial
+from functools import partial, wraps
 from typing import List
 import zipfile
 import glob
@@ -129,10 +129,8 @@ def plot_labels_cmd(labels):
             plt.text(0.2, 0.2, v, transform=fig.transFigure)
         elif k == 'lower-right':
             plt.text(0.7, 0.2, v, transform=fig.transFigure)
-
-
-    plt.show()
-    plt.close()
+    
+    return fig
 
 def plot_labels_physical(labels):
     fig  = plt.figure()
@@ -152,8 +150,7 @@ def plot_labels_physical(labels):
             plt.text(0.65, 0.2, v, transform=fig.transFigure)
 
 
-    plt.show()
-    plt.close()
+    return fig
 
 
 def plot_labels_stars(labels):
@@ -172,10 +169,8 @@ def plot_labels_stars(labels):
             plt.text(0.2, 0.2, v, transform=fig.transFigure)
         elif k == 'lower-right':
             plt.text(0.65, 0.2, v, transform=fig.transFigure)
-
-
-    plt.show()
-    plt.close()
+    
+    return fig
 
 def show_cluster_data(ax=None, *args, **kwargs):
     """
@@ -214,7 +209,7 @@ def show_cluster_data(ax=None, *args, **kwargs):
 
 def write_label(x, y, label, ax, color='red', **kwargs):
 
-    if x == "CHANGE ME" or y == "CHANGE ME":
+    if x in {"CHANGE ME", "X"} or y in {"CHANGE ME", "Y"}:
         return #they still need to replace them
 
     if isinstance(x, str):
@@ -229,7 +224,7 @@ def write_label(x, y, label, ax, color='red', **kwargs):
 def distance_mod(M, d):
     return M + 5*np.log10(d/10)
     
-def show_isochrone(age=14.5, distance=10, Fe_H=0.06, Y=0.2682, ax=None, **kwargs):
+def show_isochrone(age=8, distance=10, Fe_H=0.06, Y=0.2682, ax=None, **kwargs):
     """
     Fe_H = 0.06 is from this paper https://arxiv.org/abs/1310.6297 
     """
@@ -324,3 +319,34 @@ def cluster_filter(
         res.to_csv("cleaned-M67-data.csv")
 
     return res
+
+""" 
+Some stuff for properly testing their apparent_magnitude function
+
+1) We need a function decorator to register our unit test with that function
+"""
+
+def test(test_func):
+    """Decorator to register a test function for a function"""
+    def wrapper(func):        
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            result = func(*args, **kwargs)  # Execute the function
+            return result  # Return original function result
+        
+        # Run the test immediately upon redefinition
+        test_func(func)
+
+        return wrapped_func
+    return wrapper
+
+"""
+2) We then also need to define our unit test function
+"""
+def test_apparent_magnitude_function(apparent_magnitude, epsilon=1e-1):
+    """
+    Unit test for the apparent magnitude function
+    """
+    assert apparent_magnitude(0, 10) == 0 or apparent_magnitude(10, 0) == 0, f"Your function did not work on M=0, d=10 pc!"
+    assert abs(apparent_magnitude(5, 40) - 8.01) < epsilon or abs(apparent_magnitude(10, 0) - 8.01) < epsilon, f"Your function did not work on M=5, d=40 pc!"
+    assert abs(apparent_magnitude(-1, 400) - 7.01) < 0 or abs(apparent_magnitude(400, -1) - 7.01) < 0, f"Your function did not work on M=-1, d=400 pc!"
