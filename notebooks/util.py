@@ -260,7 +260,7 @@ def show_isochrone(age=8, distance=10, Fe_H=0.06, Y=0.2682, ax=None, **kwargs):
     
     ax.plot(g-r, g, linewidth=3, **kwargs)
     ax.invert_yaxis()
-    
+        
     return ax
 
 show_correct_isochrone = partial(show_isochrone, distance=800, age=6, color='red', label='D=800 pc\nAge=6 Gyr')
