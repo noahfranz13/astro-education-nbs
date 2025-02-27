@@ -1,5 +1,6 @@
 from functools import partial, wraps
 from typing import List
+from datetime import datetime
 import zipfile
 import glob
 from copy import deepcopy
@@ -341,7 +342,7 @@ def test(test_func):
     return wrapper
 
 """
-2) We then also need to define our unit test function
+2) We then also need to define our unit test functions
 """
 def test_apparent_magnitude_function(apparent_magnitude, epsilon=1e-1):
     """
@@ -350,3 +351,25 @@ def test_apparent_magnitude_function(apparent_magnitude, epsilon=1e-1):
     assert apparent_magnitude(0, 10) == 0 or apparent_magnitude(10, 0) == 0, f"Your function did not work on M=0, d=10 pc!"
     assert abs(apparent_magnitude(5, 40) - 8.01) < epsilon or abs(apparent_magnitude(10, 0) - 8.01) < epsilon, f"Your function did not work on M=5, d=40 pc!"
     assert abs(apparent_magnitude(-1, 400) - 7.01) < 0 or abs(apparent_magnitude(400, -1) - 7.01) < 0, f"Your function did not work on M=-1, d=400 pc!"
+
+def test_delta_y_function(delta_y):
+    """
+    Show a plot of y vs. t based on their delta_y function
+    """
+    fig, ax = plt.subplots()
+    
+    v0 = 10
+    t = np.linspace(0, 2, 100)
+    
+    ax.plot(t, delta_y(t, v0))
+    ax.set_ylabel(r"y(t)")
+    ax.set_xlabel("t")
+    
+# CLASSTIME = datetime(2025, 2, 27, 9, 0, 0, 0)
+CLASSTIME = datetime(2025, 3, 1, 0, 0, 0, 0)
+def test_time():
+    """
+    Just throw an error if the time isn't later than the global variable TIME
+    """
+    global CLASSTIME
+    assert datetime.now() > CLASSTIME, "Please wait until class time to try this part of the code!"
