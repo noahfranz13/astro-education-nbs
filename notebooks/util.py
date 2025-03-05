@@ -350,7 +350,7 @@ def test_apparent_magnitude_function(apparent_magnitude, epsilon=1e-1):
     """
     assert apparent_magnitude(0, 10) == 0 or apparent_magnitude(10, 0) == 0, f"Your function did not work on M=0, d=10 pc!"
     assert abs(apparent_magnitude(5, 40) - 8.01) < epsilon or abs(apparent_magnitude(10, 0) - 8.01) < epsilon, f"Your function did not work on M=5, d=40 pc!"
-    assert abs(apparent_magnitude(-1, 400) - 7.01) < 0 or abs(apparent_magnitude(400, -1) - 7.01) < 0, f"Your function did not work on M=-1, d=400 pc!"
+    assert abs(apparent_magnitude(-1, 400) - 7.01) < epsilon or abs(apparent_magnitude(400, -1) - 7.01) < epsilon, f"Your function did not work on M=-1, d=400 pc!"
 
 def test_delta_y_function(delta_y):
     """
