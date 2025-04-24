@@ -170,3 +170,6 @@ MIST_v1.2_vvcrit0.0_basic_isos*
 
 # Ignore the MACOS directory
 *__MACOS*
+
+# ignore private data that has potentially (although unlikely) identifying info
+data-analysis/private-data*
