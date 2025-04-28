@@ -4,3 +4,5 @@
 </a>
 
 Code and Notebooks for Astronomy Education
+# Video Introduction
+<a href="https://youtu.be/xo6r1HvsLS4">Link to Youtube</a>
